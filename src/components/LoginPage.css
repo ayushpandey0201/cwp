@@ -57,3 +57,13 @@ body {
     width: 200px; /* Adjust width to make the button smaller */
     height: 40px; /* Adjust height to make it smaller */
   }
+/* LoginPage.css */
+.Toastify__toast {
+    border-radius: 10px; /* Rounded corners for the toast */
+    padding: 10px 20px;  /* Add padding inside the toast */
+  }
+  
+  .Toastify__toast--error {
+    background-color: #d9534f; /* Red background for error */
+  }
+  
