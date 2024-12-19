@@ -40,6 +40,8 @@
 /* ----------------------------------------------- */
 
 /* app.css */
+@import 'react-toastify/dist/ReactToastify.css';
+
 * {
   box-sizing: border-box;
   margin: 0;

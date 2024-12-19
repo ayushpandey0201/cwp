@@ -1,69 +1,65 @@
-/* LoginPage.css */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .login-container {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    text-align: center;
+  background-color: white;
+  border-radius: 20px;
+  padding: 40px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.login-container h2 {
-    margin-bottom: 1.5rem;
+.icon {
+  font-size: 60px;
+  color: #667eea;
+  margin-bottom: 20px;
 }
 
-.login-container input {
-    width: 100%;
-    padding: 0.8rem;
-    margin: 0.5rem 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
+h2 {
+  color: #333;
+  font-size: 28px;
+  margin-bottom: 10px;
 }
 
-.login-container button {
-    width: 100%;
-    width: 200px;
-    padding: 0.8rem;
-    margin-top: 1rem;
-    background: #5c67f2;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
+.subtitle {
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 20px;
 }
 
-.login-container button:hover {
-    background: #4752d4;
+.description {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  text-align: justify;
 }
 
-.google-login-container .google-button {
-    width: 200px; /* Adjust width to make the button smaller */
-    height: 40px; /* Adjust height to make it smaller */
-  }
-/* LoginPage.css */
-.Toastify__toast {
-    border-radius: 10px; /* Rounded corners for the toast */
-    padding: 10px 20px;  /* Add padding inside the toast */
-  }
-  
-  .Toastify__toast--error {
-    background-color: #d9534f; /* Red background for error */
-  }
-  
+.google-login-button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.google-login-button:hover {
+  background-color: #3367d6;
+}
+
+.login-note {
+  color: #666;
+  font-size: 12px;
+  margin-top: 20px;
+}
+

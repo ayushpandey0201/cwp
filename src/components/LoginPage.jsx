@@ -1,83 +1,68 @@
 import React from 'react';
 import { GoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FaUserGraduate } from 'react-icons/fa';
 import './LoginPage.css';
 
 const LoginPage = ({ setUser }) => {
   const navigate = useNavigate();
 
-  const responseGoogle = (response) => {
-    if (response.error) {
-      toast.error('Google login failed. Please try again.', {
-        position: 'top-right',  // Use string for position
-        autoClose: 5000,
-        hideProgressBar: true,
-      });
-      console.error('Google login error:', response.error);
-      return;
-    }
+  const handleLogin = async (response) => {
+    const token = response.credential;
 
-    const googleToken = response.credential;
-    console.log('Google Token:', googleToken); // Debugging
+    try {
+      const res = await axios.post('http://localhost:5000/login', { token });
 
-    fetch('http://localhost:5000/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token: googleToken }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.message === 'Login successful') {
-          toast.success('Login successful! Redirecting...', {
-            position: 'top-right', // Use string for position
-            autoClose: 3000,
-            hideProgressBar: false,
-          });
-          setUser(data.user);
-          navigate('/home');
-        } else if (data.message === 'Access denied. Only college emails are allowed.') {
-          toast.error('Access denied. Only college emails are allowed.', {
-            position: 'top-right', // Use string for position
-            autoClose: 5000,
-            hideProgressBar: true,
-          });
-        } else {
-          toast.error('An unexpected error occurred. Please try again.', {
-            position: 'top-right', // Use string for position
-            autoClose: 5000,
-            hideProgressBar: true,
-          });
-          console.error('Login failed:', data.message);
-        }
-      })
-      .catch((err) => {
-        toast.error('Server error. Please try again later.', {
-          position: 'top-right', // Use string for position
-          autoClose: 5000,
-          hideProgressBar: true,
+      if (res.data.user) { // Check if user data is returned
+        setUser({
+          name: res.data.user.name,
+          email: res.data.user.email,
         });
-        console.error('Error during login:', err);
+        localStorage.setItem('user', JSON.stringify({
+          name: res.data.user.name,
+          email: res.data.user.email,
+        }));
+        navigate('/home');
+      } else {
+        toast.error('Login failed. Please use your college email address.', {
+          position: 'top-center',
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      toast.error('Login error: ' + error.message, {
+        position: 'top-center',
+        autoClose: 3000,
       });
+    }
   };
 
   return (
-    <div className="login-container">
-      <h2>Login with Google</h2>
-      <div className="google-login-container">
+    <div className="login-page">
+      <div className="login-container">
+        <FaUserGraduate className="icon" />
+        <h2>Welcome to Campus Connect</h2>
+        <p className="subtitle">Your gateway to anonymous campus conversations</p>
+        <p className="description">
+          Campus Connect is a unique platform designed exclusively for college students. 
+          Here, you can engage in anonymous discussions, share ideas, and connect with 
+          peers across your campus. Our app ensures your privacy while fostering open 
+          and honest communication within your college community.
+        </p>
         <GoogleLogin
-          onSuccess={responseGoogle}
-          onError={(error) => console.log('Login Failed', error)}
-          theme="filled_blue"
-          shape="rectangular"
-          width="250"
-          text="signin_with"
+          onSuccess={handleLogin}
+          onError={() => toast.error('Login Failed', {
+            position: 'top-center',
+            autoClose: 3000,
+          })}
+          className="google-login-button"
         />
+        <p className="login-note">Please log in with your college email address to access the app.</p>
+        <ToastContainer />
       </div>
-      <ToastContainer />
     </div>
   );
 };
