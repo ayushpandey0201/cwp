@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 
+const cors = require('cors');
+const { OAuth2Client } = require('google-auth-library');
+
 const User = require('./models/User');
 
 dotenv.config();
@@ -10,6 +13,15 @@ const app = express();
 
 // Middleware
 app.use(bodyParser.json());
+
+// Enable CORS only for specific origin
+app.use(cors({ 
+  origin: 'http://localhost:3000', // Allow only the frontend during development
+  credentials: true,
+}));
+
+// Initialize Google OAuth2 Client
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 // Connect to MongoDB
 mongoose
@@ -31,6 +43,51 @@ app.post('/api/users', async (req, res) => {
     res.status(201).json({ message: 'User saved successfully.', user });
   } catch (error) {
     res.status(500).json({ message: 'Error saving user.', error: error.message });
+  }
+});
+
+// Route to handle Google login
+app.post('/login', async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ message: 'Token is required.' });
+  }
+
+  try {
+    // Verify the Google ID Token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.CLIENT_ID, // Ensure the token was issued by your app
+    });
+
+    const payload = ticket.getPayload(); // Contains user info like email, name, etc.
+    const googleEmail = payload.email;
+
+    // Check if the email is from the allowed domain
+    if (!googleEmail.endsWith('@bmsce.ac.in')) {
+      return res.status(403).json({ message: 'Access denied. Only college emails are allowed.' });
+    }
+
+    // Check if the user exists in the database
+    let user = await User.findOne({ email: googleEmail });
+    if (!user) {
+      // If user doesn't exist, create a new user
+      user = new User({
+        name: payload.name,
+        email: googleEmail,
+      });
+      await user.save();
+    }
+
+    // Send a response with user info
+    res.status(200).json({
+      message: 'Login successful',
+      user: { name: user.name, email: user.email },
+    });
+  } catch (error) {
+    console.error('Error during Google login verification:', error.message);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 });
 

@@ -38,6 +38,7 @@ body {
 
 .login-container button {
     width: 100%;
+    width: 200px;
     padding: 0.8rem;
     margin-top: 1rem;
     background: #5c67f2;
@@ -51,3 +52,8 @@ body {
 .login-container button:hover {
     background: #4752d4;
 }
+
+.google-login-container .google-button {
+    width: 200px; /* Adjust width to make the button smaller */
+    height: 40px; /* Adjust height to make it smaller */
+  }
