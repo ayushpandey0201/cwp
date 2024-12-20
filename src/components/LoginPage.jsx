@@ -14,7 +14,7 @@ const LoginPage = ({ setUser }) => {
 
     const googleToken = response.credential;
 
-    fetch('http://localhost:5000/login', {   // This is where the token is sent to the backend
+    fetch('http://localhost:4000/login', {   // This is where the token is sent to the backend
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
