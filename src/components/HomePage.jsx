@@ -72,21 +72,7 @@ const HomePage = () => {
     setShowChat(false); // Hide chat interface without clearing message
   };
 
-  const handleLogout = () => {
-    // Call googleLogout to sign out from Google
-    googleLogout();
 
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
-
-    // Optionally, disconnect socket if needed
-    if (socket) {
-      socket.disconnect();
-    }
-
-    // Redirect to login page (or wherever you need)
-    window.location.href = '/login';  // Adjust based on your routing setup
-  };
 
   if (!user) {
     return <div>Loading...</div>;
@@ -94,22 +80,10 @@ const HomePage = () => {
 
   return (
     <div style={{ padding: '20px' }}>
+     
+
       <h1>Welcome, {user.name}!</h1>
       <p>Email: {user.email}</p>
-
-      <button
-        onClick={handleLogout}
-        style={{
-          padding: '10px 20px',
-          backgroundColor: '#f44336',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          marginTop: '20px',
-        }}
-      >
-        Logout
-      </button>
 
       {!showChat ? (
         <button
