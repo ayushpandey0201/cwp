@@ -1,74 +1,110 @@
 import React from "react";
-import { Box, Typography, List, ListItem, ListItemText, Divider } from "@mui/material";
+import { Avatar } from "@mui/material";
+import { FaEnvelope, FaGithub, FaLinkedin } from "react-icons/fa";
+import "./ContactPage.css";
 
 const ContactPage = () => {
   const developers = [
-    { name: "Ayush Pandey", email: "ayush.pandey@example.com" },
-    { name: "Pratham", email: "pratham@example.com" },
-    { name: "Vivek Boora", email: "vivek.boora@example.com" },
-    { name: "Nitin", email: "nitin@example.com" },
+    { 
+      name: "Ayush Pandey", 
+      email: "ayush.pandey@example.com",
+      role: "Team Leader",
+      avatar: "AP",
+      github: "https://github.com/Ayush7890",
+      linkedin: "https://www.linkedin.com/in/ayush-pandey-455b80228/",
+    },
+    { 
+      name: "Nitin Harsur", 
+      email: "nitin@example.com",
+      role: "Team Member",
+      avatar: "N"
+    },
+    { 
+      name: "Vivek Boora", 
+      email: "vivek.boora@example.com",
+      role: "Team Member",
+      avatar: "VB"
+    },
+ 
   ];
 
+  // Sort developers alphabetically by name
+  developers.sort((a, b) => a.name.localeCompare(b.name));
+
   return (
-    <Box
-      sx={{
-        padding: 4,
-        maxWidth: "800px",
-        margin: "0 auto",
-        backgroundColor: "#f9f9f9",
-        borderRadius: "8px",
-        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <Typography variant="h4" gutterBottom align="center">
-        Contact Page
-      </Typography>
-      <Typography variant="body1" gutterBottom>
-        Have questions or feedback? Reach out to any of the developers below:
-      </Typography>
+    <div className="contact-page">
+      <div className="contact-container">
+        <div className="contact-header">
+          <h1>Meet Our Team</h1>
+          <p>We're passionate about creating meaningful connections on campus</p>
+        </div>
 
-      <Divider sx={{ marginY: 2 }} />
+        <div className="developers-grid">
+          {developers.map((developer, index) => (
+            <div key={index} className="developer-card">
+              {developer.role === "Team Leader" && <div className="team-leader-badge">Team Leader</div>}
+              <div className="developer-avatar">
+                <Avatar 
+                  sx={{ 
+                    width: 80, 
+                    height: 80, 
+                    bgcolor: '#9D4EDD',
+                    fontSize: '24px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {developer.avatar}
+                </Avatar>
+              </div>
+              
+              <div className="developer-info">
+                <h3>{developer.name}</h3>
+                <p className="developer-role">{developer.role}</p>
+                <div className="developer-contact">
+                  <a href={`mailto:${developer.email}`} className="contact-link">
+                    <FaEnvelope />
+                    <span>{developer.email}</span>
+                  </a>
+                </div>
+              </div>
 
-      <Typography variant="h5" gutterBottom>
-        Developers
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        {developers.map((developer, index) => (
-          <Box
-            key={index}
-            sx={{
-              padding: 2,
-              border: "1px solid #ddd",
-              borderRadius: "6px",
-              backgroundColor: "#fff",
-              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-            }}
-          >
-            <Typography variant="h6" component="p">
-              {developer.name}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {developer.email}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+              <div className="developer-social">
+                <a href={developer.github} target="_blank" rel="noopener noreferrer" className="social-btn github">
+                  <FaGithub />
+                </a>
+                <a href={developer.linkedin} target="_blank" rel="noopener noreferrer" className="social-btn linkedin">
+                  <FaLinkedin />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
 
-      <Typography
-        variant="body2"
-        color="textSecondary"
-        align="center"
-        sx={{ marginTop: 4 }}
-      >
-        We’re excited to hear from you. Thank you for visiting!
-      </Typography>
-    </Box>
+        <div className="contact-footer">
+          <div className="footer-content">
+            <h3>Get in Touch</h3>
+            <p>
+              Have questions, suggestions, or want to contribute? We'd love to hear from you!
+              Our team is always open to feedback and collaboration.
+            </p>
+            <div className="footer-features">
+              <div className="footer-feature">
+                <span className="feature-icon">💬</span>
+                <span>Open Communication</span>
+              </div>
+              <div className="footer-feature">
+                <span className="feature-icon">🚀</span>
+                <span>Continuous Improvement</span>
+              </div>
+              <div className="footer-feature">
+                <span className="feature-icon">🤝</span>
+                <span>Community Driven</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

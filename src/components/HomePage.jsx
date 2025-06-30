@@ -1,191 +1,216 @@
-import React, { useState, useEffect } from 'react';
-import { googleLogout } from '@react-oauth/google'; // Import googleLogout
+import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
-import { v4 as uuidv4 } from 'uuid'; // Import uuid
+import { v4 as uuidv4 } from 'uuid';
+import { FaComments, FaPaperPlane, FaTimes, FaArrowLeft, FaUser } from 'react-icons/fa';
+import './HomePage.css';
 
 const HomePage = () => {
   const [user, setUser] = useState(null);
   const [showChat, setShowChat] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
-  const [userAlias, setUserAlias] = useState(''); // Random alias for the user
+  const [userAlias, setUserAlias] = useState('');
+  const [privateRoomId, setPrivateRoomId] = useState(null);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    // Fetch user data from localStorage (simulate logged-in user)
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user')) || null;
     setUser(storedUser);
 
-    // Generate a random user alias using uuid
-    const alias = uuidv4(); // Generate a random alias
+    const alias = uuidv4();
     setUserAlias(alias);
 
-    // Connect to WebSocket server on backend
     const socketConnection = io('http://localhost:5000', {
       withCredentials: true,
     });
     setSocket(socketConnection);
 
-    // Listen for incoming messages
-    socketConnection.on('receiveMessage', (newMessage) => {
-      setMessages((prevMessages) => {
-        // Prevent duplicate messages
-        if (!prevMessages.some(msg => msg._id === newMessage._id)) {
-          return [...prevMessages, newMessage];
-        }
-        return prevMessages;
-      });
+    socketConnection.on('receivePublicMessage', (newMessage) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    });
+
+    socketConnection.on('receivePrivateMessage', (newMessage) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    });
+
+    socketConnection.on('privateChatStarted', ({ roomId }) => {
+      setPrivateRoomId(roomId);
+    });
+
+    socketConnection.on('chatHistory', (history) => {
+      setMessages(history);
     });
 
     return () => {
-      // Clean up socket connection on component unmount
       socketConnection.disconnect();
     };
   }, []);
 
-  const handleStartChat = () => {
-    setShowChat(true); // Display chat interface
+  const handleStartPublicChat = () => {
+    setShowChat(true);
+    setIsPublic(true);
+    socket.emit('joinPublicChat', userAlias);
+  };
+
+  const handleStartPrivateChat = () => {
+    setShowChat(true);
+    setIsPublic(false);
+    socket.emit('startPrivateChat');
   };
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      const newMessage = { sender: userAlias, alias: userAlias, message }; // Use alias as sender
-      socket.emit('sendMessage', newMessage); // Emit message to backend
-
-      // Optionally update the UI with the new message
+      const newMessage = { sender: userAlias, alias: userAlias, message };
+      if (isPublic) {
+        socket.emit('sendPublicMessage', newMessage);
+      } else if (privateRoomId) {
+        socket.emit('sendPrivateMessage', { roomId: privateRoomId, message, alias: userAlias });
+      }
       setMessages((prevMessages) => [...prevMessages, newMessage]);
-
-      setMessage(''); // Clear input
+      setMessage('');
     }
   };
 
-  const handleSkip = () => {
-    setMessage(''); // Clear input without sending
-  };
-
   const handleExit = () => {
-    setShowChat(false); // Hide chat interface
-    setMessage(''); // Reset message state
+    setShowChat(false);
+    setMessages([]);
+    setMessage('');
+    setPrivateRoomId(null);
   };
 
   const handleBack = () => {
-    setShowChat(false); // Hide chat interface without clearing message
+    setShowChat(false);
+    setMessages([]);
+    setMessage('');
+    setPrivateRoomId(null);
   };
 
-
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   if (!user) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-     
-
-      <h1>Welcome, {user.name}!</h1>
-      <p>Email: {user.email}</p>
-
+    <div className="homepage">
       {!showChat ? (
-        <button
-          onClick={handleStartChat}
-          style={{ padding: '10px 20px', fontSize: '16px' }}
-        >
-          Start Chat
-        </button>
-      ) : (
-        <div
-          style={{
-            border: '1px solid #ccc',
-            padding: '20px',
-            borderRadius: '8px',
-            marginTop: '20px',
-            backgroundColor: '#f9f9f9',
-            width: '400px',
-            margin: '0 auto',
-          }}
-        >
-          <h2>Chat Interface</h2>
-          <div
-            style={{
-              maxHeight: '300px',
-              overflowY: 'scroll',
-              marginBottom: '10px',
-              borderBottom: '1px solid #ccc',
-              paddingBottom: '10px',
-            }}
-          >
-            {messages.map((msg, index) => (
-              <div key={index}>
-                <strong>{msg.alias}:</strong> {msg.message} {/* Display alias here */}
+        <div className="welcome-section">
+          <div className="welcome-card">
+            <div className="user-info">
+              <div className="user-avatar">
+                <FaUser />
               </div>
-            ))}
+              <h1>Welcome back, {user.name}!</h1>
+              <p className="user-email">{user.email}</p>
+            </div>
+
+            <div className="app-description">
+              <h2>Anonymous Campus Chat</h2>
+              <p>
+                Connect with your campus community anonymously. Share thoughts,
+                ask questions, and engage in meaningful conversations with your peers.
+              </p>
+            </div>
+
+            <button className="start-chat-btn" onClick={handleStartPublicChat}>
+              <FaComments /> Join Public Chat
+            </button>
+
+            <button className="start-chat-btn" onClick={handleStartPrivateChat}>
+              <FaComments /> Start Private Chat
+            </button>
+
+            <div className="features">
+              <div className="feature">
+                <span className="feature-icon">🔒</span>
+                <span>100% Anonymous</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">🎓</span>
+                <span>Campus Only</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">💬</span>
+                <span>Real-time Chat</span>
+              </div>
+            </div>
           </div>
-          <textarea
-            rows="4"
-            placeholder="Type your message here..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            style={{
-              width: '100%',
-              marginBottom: '10px',
-              padding: '10px',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              fontSize: '14px',
-            }}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                handleSendMessage();
-              }
-            }}
-          />
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              onClick={handleSendMessage}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-              }}
-            >
-              Send Message
+        </div>
+      ) : (
+        <div className="chat-container">
+          <div className="chat-header">
+            <button className="back-btn" onClick={handleBack}>
+              <FaArrowLeft />
             </button>
-            <button
-              onClick={handleSkip}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#f0f0f0',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-              }}
-            >
-              Skip
+            <h2>{isPublic ? 'Public Campus Chat' : 'Private Chat'}</h2>
+            <button className="exit-btn" onClick={handleExit}>
+              <FaTimes />
             </button>
-            <button
-              onClick={handleExit}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-              }}
-            >
-              Exit
-            </button>
-            <button
-              onClick={handleBack}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#ffeb3b',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-              }}
-            >
-              Back
-            </button>
+          </div>
+
+          <div className="messages-container">
+            {messages.length === 0 ? (
+              <div className="empty-chat">
+                <FaComments />
+                <p>No messages yet. Start the conversation!</p>
+              </div>
+            ) : (
+              messages.map((msg, index) => (
+                <div key={index} className="message">
+                  <div className="message-header">
+                    <span className="user-alias">Anonymous User</span>
+                    <span className="message-time">
+                      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="message-content">{msg.message}</div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="message-input-container">
+            <textarea
+              className="message-input"
+              placeholder="Type your message here..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              rows="1"
+            />
+            <div className="input-actions">
+              <button className="skip-btn" onClick={() => setMessage('')}>
+                Clear
+              </button>
+              <button
+                className="send-btn"
+                onClick={handleSendMessage}
+                disabled={!message.trim()}
+              >
+                <FaPaperPlane />
+              </button>
+            </div>
           </div>
         </div>
       )}

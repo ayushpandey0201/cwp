@@ -1,0 +1,282 @@
+/* ContactPage Styles */
+.contact-page {
+  min-height: 100vh;
+  background: #23234b;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
+}
+
+.contact-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #23234b;
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contact-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.contact-header h1 {
+  color: #9D4EDD;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}
+
+.contact-header p {
+  color: #C0C0C0;
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.developers-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.developer-card {
+  background: #1A1A2E;
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 8px 32px 0 rgba(157, 78, 221, 0.25);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  width: 400px;
+  max-width: 90%;
+  box-sizing: border-box;
+  border: 2px solid #9D4EDD;
+  color: #C0C0C0;
+}
+
+.developer-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #9D4EDD;
+}
+
+.developer-card:hover {
+  background: #23234b;
+  box-shadow: 0 12px 40px 0 rgba(157, 78, 221, 0.45), 0 0 16px 2px #9D4EDD;
+  transform: translateY(-5px) scale(1.03);
+}
+
+.team-leader-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: #9D4EDD;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  box-shadow: 0 2px 5px rgba(157, 78, 221, 0.10);
+}
+
+.developer-avatar {
+  margin-bottom: 20px;
+}
+
+.developer-info h3 {
+  color: #9D4EDD;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.developer-role {
+  color: #C0C0C0;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.developer-contact {
+  margin-bottom: 20px;
+}
+
+.contact-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #666;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.contact-link:hover {
+  color: #667eea;
+}
+
+.contact-link svg {
+  font-size: 16px;
+}
+
+.developer-social {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.social-btn.github, .social-btn.linkedin {
+  background: #9D4EDD;
+  color: #fff;
+  border: 1px solid #9D4EDD;
+}
+
+.social-btn.github:hover, .social-btn.linkedin:hover {
+  background: #C0C0C0;
+  color: #1A1A2E;
+  border: 1px solid #C0C0C0;
+  transform: translateY(-2px);
+}
+
+.contact-footer {
+  background: #1A1A2E;
+  border-radius: 15px;
+  padding: 40px;
+  border: 2px solid #9D4EDD;
+  text-align: center;
+}
+
+.footer-content h3 {
+  color: #9D4EDD;
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.footer-content p {
+  color: #C0C0C0;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer-features {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.footer-feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #C0C0C0;
+  font-size: 14px;
+}
+
+.footer-feature .feature-icon {
+  color: #9D4EDD;
+  font-size: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .contact-page {
+    padding: 10px;
+  }
+  
+  .contact-container {
+    padding: 20px;
+  }
+  
+  .contact-header h1 {
+    font-size: 28px;
+  }
+  
+  .contact-header p {
+    font-size: 16px;
+  }
+  
+  .developers-grid {
+    gap: 20px;
+  }
+  
+  .developer-card {
+    padding: 20px;
+  }
+  
+  .developer-info h3 {
+    font-size: 20px;
+  }
+  
+  .footer-features {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .contact-footer {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-header h1 {
+    font-size: 24px;
+  }
+  
+  .developer-card {
+    padding: 15px;
+  }
+  
+  .developer-info h3 {
+    font-size: 18px;
+  }
+  
+  .developer-role {
+    font-size: 14px;
+  }
+} 
