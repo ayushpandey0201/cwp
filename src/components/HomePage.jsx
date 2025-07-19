@@ -31,10 +31,19 @@ const HomePage = () => {
     setUserAlias(alias);
 
     const socketConnection = io('http://localhost:5000', {
+      transports: ['websocket'], // ✅ Force websocket (avoid polling fallback)
       withCredentials: true,
     });
+    
     setSocket(socketConnection);
-
+    socketConnection.on('connect', () => {
+      console.log('✅ WebSocket connected:', socketConnection.id);
+    });
+    
+    socketConnection.on('connect_error', (err) => {
+      console.error('❌ WebSocket connect error:', err.message);
+    });
+    
     socketConnection.on('receivePublicMessage', (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });

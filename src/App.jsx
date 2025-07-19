@@ -12,7 +12,7 @@ const App = () => {
 
   // Google OAuth Client ID - use environment variable or fallback
   // Make sure this client ID has http://localhost:3000 in authorized origins in Google Cloud Console
-  const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "270104599039-h79kak4mdr6uosq4mqm3a5bvmkcfgfp2.apps.googleusercontent.com";
+  const GOOGLE_CLIENT_ID =  "270104599039-h79kak4mdr6uosq4mqm3a5bvmkcfgfp2.apps.googleusercontent.com";
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
