@@ -1,16 +1,25 @@
 const express = require('express');
 const cors = require('cors');
-const { OAuth2Client } = require('google-auth-library');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const http = require('http');
 const { Server } = require('socket.io');
-const { User, Chat } = require('./models/User');
+const { OAuth2Client } = require('google-auth-library');
+const { User, PublicMessage, PrivateMessage } = require('./models/User');
 const { v4: uuidv4 } = require('uuid');
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    credentials: true,
+  },
+});
+
+// Google OAuth2 client
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
 // Middleware
@@ -20,26 +29,15 @@ app.use(cors({
   credentials: true,
 }));
 
-// Create HTTP server
-const server = http.createServer(app);
-
-// Initialize Socket.IO
-const io = new Server(server, {
-  cors: {
-    origin: 'http://localhost:3000',
-    credentials: true,
-  },
-});
-
-// MongoDB Connection
+// MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
 .then(() => console.log('✅ Connected to MongoDB'))
-.catch((err) => console.error('❌ MongoDB connection failed:', err));
+.catch(err => console.error('❌ MongoDB connection failed:', err));
 
-// Google Login Route
+// Login Route
 app.post('/login', async (req, res) => {
   const { token } = req.body;
   if (!token) return res.status(400).json({ message: 'Token is required' });
@@ -53,7 +51,7 @@ app.post('/login', async (req, res) => {
     const payload = ticket.getPayload();
     const googleEmail = payload.email;
 
-    // Optional domain restriction
+    // Restrict to specific domains if provided
     if (process.env.ALLOWED_DOMAINS) {
       const allowedDomains = process.env.ALLOWED_DOMAINS.split(',');
       const isAllowed = allowedDomains.some(domain => googleEmail.endsWith(domain.trim()));
@@ -64,10 +62,7 @@ app.post('/login', async (req, res) => {
 
     let user = await User.findOne({ email: googleEmail });
     if (!user) {
-      user = new User({
-        name: payload.name,
-        email: googleEmail,
-      });
+      user = new User({ name: payload.name, email: googleEmail });
       await user.save();
     }
 
@@ -82,40 +77,39 @@ app.post('/login', async (req, res) => {
       alias,
     });
   } catch (error) {
-    console.error('Error during Google login verification:', error);
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
 // WebSocket Logic
-let waitingUser = null; // For private chat pairing queue
+let waitingUser = null;
 
 io.on('connection', (socket) => {
   console.log('📡 User connected:', socket.id);
-
   let userAlias;
 
-  // Join Public Chat
+  // Join Public Chat Room
   socket.on('joinPublicChat', async (alias) => {
     userAlias = alias;
     socket.join('campusPublic');
 
-    const chatHistory = await Chat.find({ roomId: 'campusPublic' }).sort({ timestamp: 1 });
+    const chatHistory = await PublicMessage.find().sort({ timestamp: 1 });
     socket.emit('chatHistory', chatHistory);
 
-    console.log(`👥 ${socket.id} joined campusPublic`);
+    console.log(`👥 ${alias} joined campusPublic`);
   });
 
-  // Send message in Public Chat
-  socket.on('sendPublicMessage', async (data) => {
-    const { message, alias } = data;
-    const newMessage = new Chat({ roomId: 'campusPublic', sender: alias, message });
+  // Public Message
+  socket.on('sendPublicMessage', async ({ message, alias }) => {
+    const newMessage = new PublicMessage({ sender: alias, message });
     await newMessage.save();
 
+    console.log(`[Public] ${alias}: ${message}`);
     io.to('campusPublic').emit('receivePublicMessage', newMessage);
   });
 
-  // Start Private 1-on-1 Chat
+  // Private Chat Room (1-to-1 anonymous)
   socket.on('startPrivateChat', () => {
     if (waitingUser) {
       const roomId = `private-${waitingUser.id}-${socket.id}`;
@@ -132,15 +126,16 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Send message in Private Chat
+  // Private Message
   socket.on('sendPrivateMessage', async ({ roomId, message, alias }) => {
-    const newMessage = new Chat({ roomId, sender: alias, message });
+    const newMessage = new PrivateMessage({ roomId, sender: alias, message });
     await newMessage.save();
 
+    console.log(`[Private] (${roomId}) ${alias}: ${message}`);
     io.to(roomId).emit('receivePrivateMessage', newMessage);
   });
 
-  // Handle disconnect
+  // Disconnect
   socket.on('disconnect', () => {
     if (waitingUser && waitingUser.id === socket.id) {
       waitingUser = null;
@@ -149,7 +144,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// Start the server
+// Start Server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

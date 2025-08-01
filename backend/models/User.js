@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// User schema
+// 1️⃣ User schema
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -13,19 +13,29 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-// Chat message schema
-const chatSchema = new mongoose.Schema({
-  sender: String, // Alias or ID of the sender for anonymous chats
-  message: String, // The chat message
+// 2️⃣ Public message schema
+const PublicMessageSchema = new mongoose.Schema({
+  sender: String, // Alias or anonymous
+  message: String,
   timestamp: { type: Date, default: Date.now },
 });
 
-// Create models
-const User = mongoose.model('User', UserSchema);
-const Chat = mongoose.model('Chat', chatSchema);
+// 3️⃣ Private message schema
+const PrivateMessageSchema = new mongoose.Schema({
+  roomId: String, // Room identifier
+  sender: String,
+  message: String,
+  timestamp: { type: Date, default: Date.now },
+});
 
-// Export both models
+// Models
+const User = mongoose.model('User', UserSchema);
+const PublicMessage = mongoose.model('PublicMessage', PublicMessageSchema);
+const PrivateMessage = mongoose.model('PrivateMessage', PrivateMessageSchema);
+
+// Export all
 module.exports = {
   User,
-  Chat,
+  PublicMessage,
+  PrivateMessage,
 };
