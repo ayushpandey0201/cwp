@@ -85,7 +85,6 @@ const HomePage = () => {
       } else if (privateRoomId) {
         socket.emit('sendPrivateMessage', { roomId: privateRoomId, message, alias: userAlias });
       }
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
       setMessage('');
     }
   };
